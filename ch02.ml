@@ -24,7 +24,7 @@ module ListStack: Stack = struct
     | [] -> raise (Failure "empty")
     | h :: t -> t
   let rec (++) xs ys = match xs with
-    | [] -> xs
+    | [] -> ys
     | h :: t -> h :: t ++ ys
   let rec update xs i y = match xs, i with
     | [], _ -> raise (Failure "empty")
