@@ -78,7 +78,7 @@ module type Ordered = sig
   val leq: t -> t -> bool
 end
 
-module UnbalancedSet(El: Ordered)  = struct
+module UnbalancedSet(El: Ordered) : (Set with type el = El.t) = struct
   type el = El.t
   type t = E | T of t * el * t
   exception InsertError
@@ -116,7 +116,7 @@ module UnbalancedSet(El: Ordered)  = struct
         if El.eq x y then raise InsertError
         else if El.lt x y then T(loop left, y, right)
         else T(left, y, loop right)
-    in try (loop tree) with InsertError -> tree
+    in try loop tree with InsertError -> tree
 
   (* Exercise 2.4 *)
   let insert3 x = function
