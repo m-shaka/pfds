@@ -81,6 +81,7 @@ end
 module UnbalancedSet(El: Ordered) : (Set with type el = El.t) = struct
   type el = El.t
   type t = E | T of t * el * t
+  exception InsertError
 
   let empty = E
   let rec member x = function
@@ -108,23 +109,25 @@ module UnbalancedSet(El: Ordered) : (Set with type el = El.t) = struct
       in loop tree y
 
   (* Exercise 2.3 *)
-  let rec insert2 x = function
-    | E -> T(E, x, E)
-    | T(left, y, right) ->
-      if El.eq x y then raise (Failure "")
-      else if El.lt x y then T(insert2 x left, y, right)
-      else T(left, y, insert2 x right)
+  let rec insert2 x tree =
+    let rec loop tree = match tree with
+      | E -> T(E, x, E)
+      | T(left, y, right) ->
+        if El.eq x y then raise InsertError
+        else if El.lt x y then T(loop left, y, right)
+        else T(left, y, loop right)
+    in try loop tree with InsertError -> tree
 
   (* Exercise 2.4 *)
   let insert3 x = function
     | E -> T(E, x, E)
     | T(_, y, _) as tree ->
       let rec loop tree acc = match tree with
-        | E -> if El.eq x acc then raise (Failure "") else T(E, x, E)
-        | T(left, y, right) ->
-          if El.lt x y then T(loop left acc, y, right)
-          else T(left, y, loop right y)
-      in loop tree y
+        | E -> if El.eq x acc then raise InsertError else T(E, x, E)
+        | T(left, y', right) ->
+          if El.lt x y' then T(loop left acc, y', right)
+          else T(left, y', loop right y')
+      in try loop tree y with InsertError -> tree
 
   (* Exercise 2.5a *)
   let rec complete x d = match d with
