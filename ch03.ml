@@ -19,15 +19,14 @@ module LeftistHeap(Elem: Ch02.Ordered) : (Heap with module El = Elem) = struct
   let empty = E
   let isEmpty h = h = E
   let rank = function | E -> 0 | T(r, _, _, _) -> r
+  let makeT x a b =
+    if rank a >= rank b then T((rank b)+1, x, a, b)
+    else T((rank a)+1, x, b, a)
 
   let rec merge h1 h2 = match h1, h2 with
     | _, E -> h1
     | E, _ -> h2
     | T(_, x, l1, r1), T(_, y, l2, r2) ->
-      let makeT x a b =
-        if rank a >= rank b then T((rank b)+1, x, a, b)
-        else T((rank a)+1, x, b, a)
-      in
       if El.leq x y then makeT x l1 (merge r1 h2)
       else makeT y l2 (merge h1 r2)
 
@@ -40,4 +39,11 @@ module LeftistHeap(Elem: Ch02.Ordered) : (Heap with module El = Elem) = struct
   let deleteMin = function
     | E -> raise Empty
     | T(_, _, l, r) -> merge l r
+
+  (* Exercise 3.2 *)
+  let insert2 x = function
+    | E -> T(1, x, E, E)
+    | T(r, y, left, right) as tree ->
+      if El.leq x y then T(1, x, tree, E)
+      else makeT y left (insert x right)
 end
