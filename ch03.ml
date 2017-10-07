@@ -18,6 +18,7 @@ module LeftistHeap(Elem: Ch02.Ordered) : (Heap with module El = Elem) = struct
 
   let empty = E
   let isEmpty h = h = E
+  let singleton x = T(1, x, E, E)
   let rank = function | E -> 0 | T(r, _, _, _) -> r
   let makeT x a b =
     if rank a >= rank b then T((rank b)+1, x, a, b)
@@ -42,8 +43,24 @@ module LeftistHeap(Elem: Ch02.Ordered) : (Heap with module El = Elem) = struct
 
   (* Exercise 3.2 *)
   let insert2 x = function
-    | E -> T(1, x, E, E)
+    | E -> singleton x
     | T(r, y, left, right) as tree ->
       if El.leq x y then T(1, x, tree, E)
       else makeT y left (insert x right)
+
+  (* Exercise 3.3 *)
+  let fromList = function
+    | [] -> E
+    | [x] -> singleton x
+    | _ as lst ->
+      let singletons = List.map singleton lst in
+      let rec mergeLoop l =
+        let rec mergePair l = match l with
+          | h1 :: h2 :: rest -> (merge h1 h2) :: mergePair rest
+          | _ -> l
+        in match l with
+        | [] -> E
+        | [x] -> x
+        | _ -> mergeLoop (mergePair l)
+      in mergeLoop singletons
 end
